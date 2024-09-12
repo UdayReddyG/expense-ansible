@@ -66,13 +66,7 @@
         state: present
 
     - name: Load MySQL schema
-      ansible.builtin.mysql_db:
-        name: backend
-        state: import
-        target: /app/schema/backend.sql
-        login_host: database.the4teen.info
-        login_user: root
-        login_password: 'ExpenseApp@1'
+      ansible.builtin.shell: mysql -h mysql.the4teen.info -uroot -pExpenseApp@1 < /app/schema/backend.sql
 
     - name: Reload systemd daemon and start backend service
       ansible.builtin.systemd:
