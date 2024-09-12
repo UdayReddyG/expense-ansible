@@ -3,5 +3,5 @@
   tasks:
   - name: installing mysql
     community.mysql.mysql_db:
-    name: bobdata
-    state: present
+     name: bobdata
+     state: present
