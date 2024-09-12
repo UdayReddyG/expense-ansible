@@ -19,3 +19,23 @@
   - name: adding user
     ansible.builtin.command: useradd expense
     when: error.rc != 0
+
+  - name: creating diretory app
+    ansible.builtin.shell: mkdir -p /app | cd /app
+
+  - name: downloading
+    ansible.builtin.command: curl -o /tmp/backend.zip https://expense-builds.s3.us-east-1.amazonaws.com/expense-backend-v2.zip
+
+  - name: unzip
+    ansible.builtin.command: unzip /tmp/backend.zip
+
+  - name: npm install
+    ansible.builtin.package:
+     name: npm
+     state: present
+    
+  - name: start reload and daemon
+    ansible.builtin.shell: systemctl daemon-reload | systemctl start backend | systemctl enable backend
+
+  
+
