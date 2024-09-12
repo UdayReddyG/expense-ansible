@@ -2,6 +2,6 @@
   hosts: database
   tasks:
   - name: installing mysql
-    community.mysql.mysql_db:
-     name: bobdata
+    yum:
+     name: mysql-server
      state: present
