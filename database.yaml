@@ -1,5 +1,6 @@
 - name: creating databse
   hosts: database
+  become: yes
   tasks:
   - name: installing mysql
     yum:
