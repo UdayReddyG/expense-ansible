@@ -2,67 +2,82 @@
   hosts: backend
   become: yes
   tasks: 
-  - name: disable
-    ansible.builtin.command: dnf module disable nodejs -y
-  - name: disable
-    ansible.builtin.command: dnf module enable nodejs:20 -y
-  - name: installing nodejs
-    ansible.builtin.package:
-     name: nodejs
-     state: present
+    - name: Disable Node.js module
+      ansible.builtin.dnf:
+        name: nodejs
+        state: absent
+        disable_gpg_check: yes
 
-  - name: checking user
-    ansible.builtin.command: id expense
-    ignore_errors: true
-    register: error
+    - name: Enable Node.js version 20 module
+      ansible.builtin.dnf:
+        name: "@nodejs:20"
+        state: present
+        enable: yes
+        disable_gpg_check: yes
 
-  - name: watching user
-    ansible.builtin.debug:
-     msg: "show: {{error}}"
+    - name: Install Node.js
+      ansible.builtin.package:
+        name: nodejs
+        state: present
 
-  - name: adding user
-    ansible.builtin.command: useradd expense
-    when: error.rc != 0
+    - name: Check if user 'expense' exists
+      ansible.builtin.user:
+        name: expense
+        state: present
+        update_password: on_create
+        createhome: yes
+      ignore_errors: true
+      register: error
 
-  - name: creating diretory app
-    ansible.builtin.command: mkdir -p /app
+    - name: Add user 'expense' if not exists
+      ansible.builtin.user:
+        name: expense
+        state: present
+      when: error.rc != 0
 
-  - name: entering app
-    ansible.builtin.command: cd /app
+    - name: Create /app directory
+      ansible.builtin.file:
+        path: /app
+        state: directory
 
+    - name: Download backend zip file
+      ansible.builtin.get_url:
+        url: https://expense-builds.s3.us-east-1.amazonaws.com/expense-backend-v2.zip
+        dest: /tmp/backend.zip
 
-  - name: downloading
-    ansible.builtin.command: curl -o /tmp/backend.zip https://expense-builds.s3.us-east-1.amazonaws.com/expense-backend-v2.zip
+    - name: Unzip backend package into /app
+      ansible.builtin.unarchive:
+        src: /tmp/backend.zip
+        dest: /app
+        remote_src: yes
+        creates: /app/package.json
 
-  - name: Unzip backend package into /app
-    ansible.builtin.unarchive:
-      src: /tmp/backend.zip
-      dest: /app
-      remote_src: yes
-      creates: /app/package.json
-      
-  - name: npm install
-    ansible.builtin.package:
-     name: npm
-     state: present
+    - name: Install npm
+      ansible.builtin.package:
+        name: npm
+        state: present
 
-  - name: Copy backend.service to systemd
-    ansible.builtin.copy:
-      src: /home/ec2-user/expense-ansible/backend.service
-      dest: /etc/systemd/system/backend.service
+    - name: Copy backend.service to systemd
+      ansible.builtin.copy:
+        src: /home/ec2-user/expense-ansible/backend.service
+        dest: /etc/systemd/system/backend.service
 
-  - name: Install MySQL server
-    ansible.builtin.dnf:
-      name: mysql
-      state: present
+    - name: Install MySQL server
+      ansible.builtin.dnf:
+        name: mysql
+        state: present
 
-  - name: Load MySQL schema
-    ansible.builtin.shell: |
-      mysql -h database.the4teen.info -uroot -pExpenseApp@1 < /app/schema/backend.sql
+    - name: Load MySQL schema
+      ansible.builtin.mysql_db:
+        name: backend
+        state: import
+        target: /app/schema/backend.sql
+        login_host: database.the4teen.info
+        login_user: root
+        login_password: 'ExpenseApp@1'
 
-    
-  - name: start reload and daemon
-    ansible.builtin.shell: systemctl daemon-reload | systemctl start backend | systemctl enable backend
-
-  
-
+    - name: Reload systemd daemon and start backend service
+      ansible.builtin.systemd:
+        name: backend
+        state: started
+        enabled: yes
