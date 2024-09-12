@@ -1,6 +1,8 @@
 - name: creating databse
   hosts: database
   become: yes
+  vars:
+   password: "ExpenseApp@1"
   tasks:
   - name: installing mysql
     yum:
