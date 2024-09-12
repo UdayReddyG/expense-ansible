@@ -1,5 +1,5 @@
 - name: creating databse
-  hosts: backend
+  hosts: database
   tasks:
   - name: installing mysql
     community.mysql.mysql_db:
