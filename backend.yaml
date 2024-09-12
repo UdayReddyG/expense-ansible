@@ -22,8 +22,6 @@
       ansible.builtin.user:
         name: expense
         state: present
-        update_password: on_create
-        createhome: yes
       ignore_errors: true
       register: error
 
