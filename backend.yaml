@@ -25,7 +25,7 @@
         state: present
 
     - name: create user
-      ansible.nuiltin.user:
+      ansible.builtin.user:
        name: expense
 
     - name: Create /app directory
