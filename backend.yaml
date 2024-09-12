@@ -1,0 +1,8 @@
+- name: backend
+  hosts: backend
+  become: yes
+  tasks: 
+  - name: installing nodejs
+    ansible.builtin.package:
+     name: nodejs
+     state: present
