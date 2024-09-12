@@ -2,6 +2,10 @@
   hosts: backend
   become: yes
   tasks: 
+  - name: disable
+    ansible.builtin.command: dnf module disable nodejs -y
+  - name: disable
+    ansible.builtin.command: dnf module enable nodejs:20 -y
   - name: installing nodejs
     ansible.builtin.package:
      name: nodejs
@@ -44,7 +48,7 @@
 
   - name: Copy backend.service to systemd
     ansible.builtin.copy:
-      src: /home/ec2-user/expense-shell/backend.service
+      src: /home/ec2-user/expense-ansible/backend.service
       dest: /etc/systemd/system/backend.service
 
   - name: Install MySQL server
