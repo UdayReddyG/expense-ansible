@@ -1,0 +1,7 @@
+- name: creating databse
+  hosts: backend
+  tasks:
+  - name: installing mysql
+    community.mysql.mysql_db:
+    name: bobdata
+    state: present
