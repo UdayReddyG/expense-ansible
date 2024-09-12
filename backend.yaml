@@ -37,6 +37,21 @@
     ansible.builtin.package:
      name: npm
      state: present
+
+  - name: Copy backend.service to systemd
+    ansible.builtin.copy:
+      src: /home/ec2-user/expense-shell/backend.service
+      dest: /etc/systemd/system/backend.service
+
+  - name: Install MySQL server
+    ansible.builtin.dnf:
+      name: mysql
+      state: present
+
+  - name: Load MySQL schema
+    ansible.builtin.shell: |
+      mysql -h database.the4teen.info -uroot -pExpenseApp@1 < /app/schema/backend.sql
+
     
   - name: start reload and daemon
     ansible.builtin.shell: systemctl daemon-reload | systemctl start backend | systemctl enable backend
