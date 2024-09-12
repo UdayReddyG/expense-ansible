@@ -6,14 +6,14 @@
       ansible.builtin.dnf:
         name: nodejs
         state: absent
-        disable_gpg_check: yes
+        
 
     - name: Enable Node.js version 20 module
       ansible.builtin.dnf:
         name: "@nodejs:20"
         state: present
         enable: yes
-        disable_gpg_check: yes
+        
 
     - name: Install Node.js
       ansible.builtin.package:
