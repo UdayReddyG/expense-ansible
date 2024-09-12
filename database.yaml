@@ -15,4 +15,4 @@
 
   - name: changing root password
     ansible.builtin.command: mysql_secure_installation --set-root-pass ExpenseApp@1
-    when: root-pass !="ExpenseApp@1"
+    when: password !="ExpenseApp@1"
