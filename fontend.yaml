@@ -2,6 +2,8 @@
   hosts: frontend
   become: yes
   tasks:
+  - name: remove
+    ansible.builtin.command: rm -rf /etc/nginx/default.d/expense.conf
   - name: install nginx
     ansible.builtin.package:
      name: nginx
