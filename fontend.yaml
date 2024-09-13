@@ -36,7 +36,7 @@
 
   - name: copy 
     ansible.builtin.copy:
-     src: /frontend.conf
+     src: /home/ec2-user/expense-ansible/frontend.conf
      dest: /etc/nginx/default.d/expense.conf
 
   - name: restart
