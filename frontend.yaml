@@ -24,3 +24,8 @@
       src: /tmp/frontend.zip
       dest: /usr/share/nginx/html
       remote_src: yes
+
+  - name: copy
+    ansible.builtin.copy:
+     src: /home/ec2-user/expense-ansible/frontend.config
+     dest: /etc/nginx/default.d/expense.conf
