@@ -43,7 +43,7 @@
         src: /tmp/backend.zip
         dest: /app
         remote_src: yes
-        creates: /app/package.json
+        
 
     - name: Install npm
       ansible.builtin.package:
