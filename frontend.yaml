@@ -6,8 +6,19 @@
     ansible.builtin.package:
      name: nginx
      state: present
+  - name: enable
+    ansible.builtin.service:
+     name: nginx
+     state: started
+     enabled: yes
   - name: remove content
-    ansible.builtin.command: rm -rf /usr/share/nginx/html/*
+    ansible.builtin.file:
+     name: usr/share/nginx/html
+     state: absent
+  - name: add content
+    ansible.builtin.file:
+     name: usr/share/nginx/html
+     state: directory
 
   - name: download
     ansible.builtin.get_url:
@@ -24,9 +35,8 @@
     ansible.builtin.copy:
      src: /home/ec2-user/expense-ansible/frontend.config
      dest: /etc/nginx/default.d/expense.conf
-  - name: enable
-    ansible.builtin.systemd:
-     name: nginx
-     state: started
-     enabled: yes
+  - name: restart
+    ansible.builtin.service:
+     name: ngnix
+     state: restarted
   
