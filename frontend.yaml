@@ -2,6 +2,8 @@
   hosts: frontend
   become: yes
   tasks: 
+  - name: removal
+    ansible.builtin.command: rm -rf /etc/nginx/default.d/expense.conf
   - name: install nginx
     ansible.builtin.package:
      name: nginx
@@ -29,8 +31,5 @@
     ansible.builtin.copy:
      src: /home/ec2-user/expense-ansible/frontend.config
      dest: /etc/nginx/default.d/expense.conf
-  - name: enable
-    ansible.builtin.systemd:
-     name: nginx
-     state: restarted
+
   
