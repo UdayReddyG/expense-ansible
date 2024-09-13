@@ -29,3 +29,8 @@
     ansible.builtin.copy:
      src: /home/ec2-user/expense-ansible/frontend.config
      dest: /etc/nginx/default.d/expense.conf
+
+  - name: restart
+    ansible.builtin.systemd:
+     name: frontend
+     state: started
