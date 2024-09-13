@@ -1,65 +1,72 @@
-- name: backend
+- name: configure backend server
   hosts: backend
   become: yes
-  tasks: 
-    - name: install pymysql
-      ansible.builtin.pip:
-       name:
-       - PyMySQL
-       executable: pip3.9
-      
-    - name: Disable Node.js module
-      ansible.builtin.command: dnf module disable nodejs -y
-        
-    - name: enable Node.js module
-      ansible.builtin.command: dnf module enable nodejs:20 -y
+  vars:
+    mysql_root_password: ExpenseApp@1
+    login_host: backend.the4teen.info
+  tasks:
+  - name: disable default nodejs
+    ansible.builtin.command: dnf module disable nodejs -y
 
-    - name: Install Node.js
-      ansible.builtin.package:
-        name: nodejs
-        state: present
+  - name: enable nodejs 20
+    ansible.builtin.command: dnf module enable nodejs:20 -y
 
-    - name: create user
-      ansible.builtin.user:
-       name: expense
+  - name: install nodejs
+    ansible.builtin.package:
+      name: "{{ item }}"
+      state: present
+    loop:
+    - nodejs
+    - mysql
 
-    - name: Create /app directory
-      ansible.builtin.file:
-        path: /app
-        state: directory
+  - name: create expense user
+    ansible.builtin.user:
+      name: expense
 
-    - name: Download backend zip file
-      ansible.builtin.get_url:
-        url: https://expense-builds.s3.us-east-1.amazonaws.com/expense-backend-v2.zip
-        dest: /tmp/backend.zip
+  - name: create app directory
+    ansible.builtin.file:
+      path: /app
+      state: directory
 
-    - name: Unzip backend package into /app
-      ansible.builtin.unarchive:
-        src: /tmp/backend.zip
-        dest: /app
-        remote_src: yes
-        
+  - name: download the backend code
+    ansible.builtin.get_url:
+      url: https://expense-builds.s3.us-east-1.amazonaws.com/expense-backend-v2.zip
+      dest: /tmp/backend.zip
 
-    - name: Install npm
-      ansible.builtin.package:
-        name: npm
-        state: present
+  - name: extract the code
+    ansible.builtin.unarchive:
+      src: /tmp/backend.zip #by default ansible thinks this is in ansible server
+      dest: /app
+      remote_src: yes
 
-    - name: Copy backend.service to systemd
-      ansible.builtin.copy:
-        src: /home/ec2-user/expense-ansible/backend.service
-        dest: /etc/systemd/system/backend.service
+  - name: install dependencies
+    ansible.builtin.command: npm install
+    args:
+      chdir: /app
 
-    - name: Install MySQL server
-      ansible.builtin.dnf:
-        name: mysql
-        state: present
+  - name: copy backend service
+    ansible.builtin.copy:
+      src: backend.service
+      dest: /etc/systemd/system/backend.service
 
-    - name: Load MySQL schema
-      ansible.builtin.shell: mysql -h mysql.the4teen.info -uroot -pExpenseApp@1 < /app/schema/backend.sql
+  - name: ansible to install pymysql
+    ansible.builtin.pip:
+      name:
+      - PyMySQL
+      - cryptography
+      executable: pip3.9
 
-    - name: Reload systemd daemon and start backend service
-      ansible.builtin.systemd:
-        name: backend
-        state: started
-        enabled: yes
+  - name: import mysql data
+    community.mysql.mysql_db:
+      login_user: root
+      login_password: "{{ mysql_root_password }}"
+      login_host: "{{ login_host }}"
+      target: /app/schema/backend.sql
+      name: all
+      state: import
+
+  - name: daemon reload
+    ansible.builtin.systemd_service:
+      daemon_reload: true
+      state: restarted
+      name: backend
