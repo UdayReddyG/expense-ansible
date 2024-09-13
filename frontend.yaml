@@ -12,13 +12,7 @@
      state: started
      enabled: yes
   - name: remove content
-    ansible.builtin.file:
-     name: usr/share/nginx/html
-     state: absent
-  - name: add content
-    ansible.builtin.file:
-     name: usr/share/nginx/html
-     state: directory
+    ansible.builtin.command: rm -rf /usr/share/nginx/html/*
 
   - name: download
     ansible.builtin.get_url:
@@ -39,4 +33,5 @@
     ansible.builtin.service:
      name: ngnix
      state: restarted
+  
   
