@@ -9,14 +9,15 @@
        executable: pip3.9
       
     - name: Disable Node.js module
-      ansible.builtin.dnf:
+      ansible.builtin.package:
         name: nodejs
-        state: absent
+        disable: yes
         
 
     - name: Enable Node.js version 20 module
-      ansible.builtin.command: dnf module enable nodejs:20 -y
-
+      ansible.builtin.package: 
+       name: nodejs:20
+       enable: yes
         
 
     - name: Install Node.js
